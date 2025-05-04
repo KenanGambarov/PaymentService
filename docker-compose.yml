@@ -1,0 +1,64 @@
+version: '3.1'
+services:
+  payment-service:
+    image: paymentservices:1.0
+    hostname: ms.payment
+    depends_on:
+      - payment_db
+      - redis
+    ports:
+      - "8084:8084"
+#    First we need create network for feign client
+#    docker network create ms-services
+    networks:
+      - ms-services
+    volumes:
+      - ./logs/payment-service:/opt/app/logs/payment-service
+    environment:
+      DB_CONNECTION_IP: payment_db
+      DB_CONNECTION_PORT: 5432
+      DB_NAME: payment_service
+      DB_CONNECTION_USERNAME: admin
+      DB_CONNECTION_PASSWORD: 123456
+  payment_db:
+    hostname: postgresql
+    image: postgres:15
+    networks:
+      - ms-services
+    restart: always
+    volumes:
+      - payment_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: payment_service
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5436:5436"
+  redis:
+    image: redis:latest
+    container_name: redis_payment
+    volumes:
+      - redis_data:/data
+    networks:
+      - ms-services
+    ports:
+      - "6383:6383"
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.11.1
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs/payment-service:/opt/app/logs/payment-service
+#    depends_on:
+#      - elasticsearch
+    networks:
+      - ms-services
+networks:
+  ms-services:
+    external: true
+    driver: bridge
+volumes:
+  payment_db_data:
+    driver: local
+  redis_data:
+    driver: local

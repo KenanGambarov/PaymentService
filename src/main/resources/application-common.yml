@@ -1,0 +1,44 @@
+resilience4j:
+  retry:
+    instances:
+      redisRetry:
+        max-attempts: 3
+        wait-duration: 2s
+        retry-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+        ignore-exceptions:
+          - com.paymentservice.exception.NotFoundException
+logging:
+  config: classpath:logback-spring.xml
+spring:
+  elasticsearch:
+    uris: http://elasticsearch:9200
+    username: elastic
+    password: sSM*iZr*b0SOvxjC_QqP
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 3s
+          max-attempts: 5
+          max-interval: 5s
+          multiplier: 1
+        missing-queues-fatal: false
+redis:
+  server:
+    urls: redis://redis:6379
+client:
+  order-service:
+    url: http://ms.order:8083
+rabbitmq:
+  publisher-service:
+    queue: PAYMENT_UPDATE
+    dlq: PAYMENT_UPDATE_DLQ
+server:
+  port: 8084

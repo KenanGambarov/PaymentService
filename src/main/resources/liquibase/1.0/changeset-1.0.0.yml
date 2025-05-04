@@ -1,0 +1,66 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-create-payment-table
+      author: kenan
+      changes:
+        - createTable:
+            tableName: payment
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: order_id
+                  type: BIGINT
+              - column:
+                  name: total_amount
+                  type: DECIMAL(19,2)
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+              - column:
+                  name: transaction_id
+                  type: VARCHAR(50)
+              - column:
+                  name: payment_method
+                  type: VARCHAR(50)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+  - changeSet:
+      id: 2-create-payment-status-history-table
+      author: kenan
+      changes:
+        - createTable:
+            tableName: payment_status_history
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: payment_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_payment_status_history_payment
+                    references: payment(id)
+              - column:
+                  name: old_status
+                  type: VARCHAR(50)
+              - column:
+                  name: new_status
+                  type: VARCHAR(50)
+              - column:
+                  name: changed_at
+                  type: TIMESTAMP
